@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace GoetasWebservices\SoapServices\Metadata\Generator;
 
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\CachedWordInflector;
+use Doctrine\Inflector\Rules\English;
+use Doctrine\Inflector\RulesetInflector;
 use GoetasWebservices\XML\SOAPReader\Soap\Operation;
 use GoetasWebservices\XML\SOAPReader\Soap\OperationMessage;
 use GoetasWebservices\XML\SOAPReader\Soap\Service;
@@ -112,7 +115,7 @@ class MetadataGenerator implements MetadataGeneratorInterface
             'style' => $soapOperation->getStyle(),
             'version' => $service->getVersion(),
             'name' => $soapOperation->getOperation()->getName(),
-            'method' => Inflector::camelize($soapOperation->getOperation()->getName()),
+            'method' => static::inflector()->camelize($soapOperation->getOperation()->getName()),
             'input' => $this->generateInOut($soapOperation, $soapOperation->getInput(), $soapOperation->getOperation()->getPortTypeOperation()->getInput(), 'Input', $service),
             'output' => $this->generateInOut($soapOperation, $soapOperation->getOutput(), $soapOperation->getOperation()->getPortTypeOperation()->getOutput(), 'Output', $service),
             'fault' => [],
@@ -130,15 +133,15 @@ class MetadataGenerator implements MetadataGeneratorInterface
         $operation = [
             'message_fqcn' => $ns
                 . $this->baseNs[$service->getVersion()]['messages'] . '\\'
-                . Inflector::classify($operationMessage->getMessage()->getOperation()->getName())
+                . static::inflector()->classify($operationMessage->getMessage()->getOperation()->getName())
                 . $direction,
             'headers_fqcn' => $ns
                 . $this->baseNs[$service->getVersion()]['headers'] . '\\'
-                . Inflector::classify($operationMessage->getMessage()->getOperation()->getName())
+                . static::inflector()->classify($operationMessage->getMessage()->getOperation()->getName())
                 . $direction,
             'part_fqcn' => $ns
                 . $this->baseNs[$service->getVersion()]['parts'] . '\\'
-                . Inflector::classify($operationMessage->getMessage()->getOperation()->getName())
+                . static::inflector()->classify($operationMessage->getMessage()->getOperation()->getName())
                 . $direction,
             'parts' => $this->getParts($param->getMessage()->getParts()),
         ];
@@ -169,5 +172,23 @@ class MetadataGenerator implements MetadataGeneratorInterface
         }
 
         return $parts;
+    }
+
+    public static function inflector(): Inflector
+    {
+        static $inflector;
+
+        if (is_null($inflector)) {
+            $inflector = new Inflector(
+                new CachedWordInflector(new RulesetInflector(
+                    English\Rules::getSingularRuleset()
+                )),
+                new CachedWordInflector(new RulesetInflector(
+                    English\Rules::getPluralRuleset()
+                ))
+            );
+        }
+
+        return $inflector;
     }
 }
