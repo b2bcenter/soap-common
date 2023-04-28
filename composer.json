@@ -1,5 +1,8 @@
 {
-  "name": "goetas-webservices/soap-common",
+  "name": "b2bcenter/soap-common",
+  "replace": {
+    "goetas-webservices/soap-common": "^0.2"
+  },
   "license": "MIT",
   "authors": [
     {

@@ -47,7 +47,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
             return $envelope;
         }
 
-        if ($args[0] instanceof $message['part_fqcn']) {
+        if ($args && $args[0] instanceof $message['part_fqcn']) {
             $envelope->setBody($args[0]);
 
             return $envelope;
@@ -76,7 +76,7 @@ class ArgumentsReader implements ArgumentsReaderInterface
         $propertyName = key($message['parts']);
         $propertyMetadata = $classMetadata->propertyMetadata[$propertyName];
 
-        if ($args[0] instanceof $propertyMetadata->type['name']) {
+        if ($args && $args[0] instanceof $propertyMetadata->type['name']) {
             $this->setValue($body, reset($args), $propertyMetadata);
 
             return $envelope;
